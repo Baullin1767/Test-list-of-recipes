@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Stark's page.COM</title>
+<style>
+td {padding:5px;}
+button{margin: 5px;}
+</style>
+</head>
+<body>
+    <h2>Список рецептов</h2>
+    <div>
+        <input type="hidden" id="recipeId" />
+        <p>
+            Имя:<br/>
+            <input id="recipeName" />
+        </p>
+        <p>
+            Описание:<br />
+            <input id="recipeDescription" />
+        </p>
+        <p>
+            Ингридиенты:<br/>
+            <input id="recipeIngredients" />
+        </p>
+        <p>
+            Шаги:<br />
+            <input id="recipeSteps" />
+        </p>
+         <p>
+            <button id="saveBtn">Сохранить</button>
+            <button id="resetBtn">Сбросить</button>
+        </p>
+    </div>
+    <table>
+        <thead><tr><th>Имя</th><th>Описание</th><th></th><th></th><th></th></tr></thead>
+        <tbody>
+        </tbody>
+    </table>
+  
+    <script>
+    // Получение всех пользователей
+        async function getRecipes() {
+            // отправляет запрос и получаем ответ
+            const response = await fetch("/api/recipes", {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            // если запрос прошел нормально
+            if (response.ok === true) {
+                // получаем данные
+                const users = await response.json();
+                const rows = document.querySelector("tbody");
+                // добавляем полученные элементы в таблицу
+                users.forEach(user => rows.append(row(user)));
+            }
+        }
+        // Получение одного пользователя
+        async function getRecipe(id) {
+            const response = await fetch(`/api/recipes/${id}`, {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            if (response.ok === true) {
+                const recipe = await response.json();
+                document.getElementById("recipeId").value = recipe.id;
+                document.getElementById("recipeName").value = recipe.name;
+                document.getElementById("recipeDescription").value = recipe.description;
+                document.getElementById("recipeIngredients").value = recipe.ingredients;
+                document.getElementById("recipeSteps").value = recipe.steps;
+            }
+            else {
+                // если произошла ошибка, получаем сообщение об ошибке
+                const error = await response.json();
+                console.log(error.message); // и выводим его на консоль
+            }
+        }
+        // Добавление пользователя
+        async function createRecipe(recipeName, recipeDescription, recipeIngredients, recipeSteps) {
+  
+            const response = await fetch("api/recipes", {
+                method: "POST",
+                headers: { "Accept": "application/json", "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: userName,
+                    description: recipeDescription,
+                    ingredients: recipeIngredients,
+                    steps: recipeSteps
+                })
+            });
+            if (response.ok === true) {
+                const recipe = await response.json();
+                document.querySelector("tbody").append(row(recipe));
+            }
+            else {
+                const error = await response.json();
+                console.log(error.message);
+            }
+        }
+        // Изменение пользователя
+        async function editRecipe(userId, recipeName, recipeDescription,
+                                    recipeIngredients, recipeSteps) {
+            const response = await fetch("api/recipes", {
+                method: "PUT",
+                headers: { "Accept": "application/json", "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: userId,
+                    name: recipeName,
+                    description: recipeDescription,
+                    ingredients: recipeIngredients,
+                    steps: recipeSteps
+                })
+            });
+            if (response.ok === true) {
+                const recipe = await response.json();
+                document.querySelector(`tr[data-rowid='${recipe.id}']`).replaceWith(row(recipe));
+            }
+            else {
+                const error = await response.json();
+                console.log(error.message);
+            }
+        }
+        // Удаление пользователя
+        async function deleteRecipe(id) {
+            const response = await fetch(`/api/recipes/${id}`, {
+                method: "DELETE",
+                headers: { "Accept": "application/json" }
+            });
+            if (response.ok === true) {
+                const recipe = await response.json();
+                document.querySelector(`tr[data-rowid='${recipe.id}']`).remove();
+            }
+            else {
+                const error = await response.json();
+                console.log(error.message);
+            }
+        }
+  
+        // сброс данных формы после отправки
+        function reset() {
+            document.getElementById("recipeId").value = 
+            document.getElementById("recipeName").value = 
+            document.getElementById("recipeDescription").value =
+            document.getElementById("recipeIngredients").value =
+            document.getElementById("recipeSteps").value = "";
+        }
+        // создание строки для таблицы
+        function row(recipe) {
+  
+            const tr = document.createElement("tr");
+            tr.setAttribute("data-rowid", recipe.id);
+  
+            const nameTd = document.createElement("td");
+            nameTd.append(recipe.name);
+            tr.append(nameTd);
+  
+            const descriptionTd = document.createElement("td");
+            descriptionTd.append(recipe.description);
+            tr.append(descriptionTd);
+  
+            const linksTd = document.createElement("td");
+  
+            const editLink = document.createElement("button"); 
+            editLink.append("Изменить");
+            editLink.addEventListener("click", async() => await getRecipe(recipe.id));
+            linksTd.append(editLink);
+  
+            const removeLink = document.createElement("button"); 
+            removeLink.append("Удалить");
+            removeLink.addEventListener("click", async () => await deleteRecipe(recipe.id));
+  
+            linksTd.append(removeLink);
+            tr.appendChild(linksTd);
+  
+            return tr;
+        }
+        // сброс значений формы
+        document.getElementById("resetBtn").addEventListener("click", () =>  reset());
+  
+        // отправка формы
+        document.getElementById("saveBtn").addEventListener("click", async () => {
+             
+            
+            // document.getElementById("recipeId").value = recipe.id;
+            // document.getElementById("recipeName").value = recipe.name;
+            // document.getElementById("recipeDescription").value = recipe.description;
+            // document.getElementById("recipeIngredients").value = recipe.ingredients;
+            // document.getElementById("recipeSteps").value = recipe.steps;
+
+
+            const id = document.getElementById("recipeId").value;
+            const name = document.getElementById("recipeName").value;
+            const description = document.getElementById("recipeDescription").value;
+            const ingredients = document.getElementById("recipeIngredients").value;
+            const steps = document.getElementById("recipeSteps").value;
+            if (id === ""){
+                await createRecipe(name, description, ingredients, steps);
+                console.log("Создал");
+            }
+            else{
+                console.log("Редачу");
+                await editRecipe(id, name, description, ingredients, steps);
+            }
+            reset();
+        });
+  
+        // загрузка пользователей
+        getRecipes();
+    </script>
+</body>
+</html>
