@@ -50,10 +50,10 @@ button{margin: 5px;}
             // если запрос прошел нормально
             if (response.ok === true) {
                 // получаем данные
-                const users = await response.json();
+                const recipes = await response.json();
                 const rows = document.querySelector("tbody");
                 // добавляем полученные элементы в таблицу
-                users.forEach(user => rows.append(row(user)));
+                recipes.forEach(user => rows.append(row(user)));
             }
         }
         // Получение одного пользователя
@@ -77,8 +77,9 @@ button{margin: 5px;}
             }
         }
         // Добавление пользователя
-        async function createRecipe(recipeName, recipeDescription, recipeIngredients, recipeSteps) {
-  
+        async function createRecipe(recipeName, recipeDescription, 
+                                    recipeIngredients, recipeSteps) {
+            console.log("тут")
             const response = await fetch("api/recipes", {
                 method: "POST",
                 headers: { "Accept": "application/json", "Content-Type": "application/json" },
@@ -194,14 +195,10 @@ button{margin: 5px;}
             const description = document.getElementById("recipeDescription").value;
             const ingredients = document.getElementById("recipeIngredients").value;
             const steps = document.getElementById("recipeSteps").value;
-            if (id === ""){
+            if (id === "")
                 await createRecipe(name, description, ingredients, steps);
-                console.log("Создал");
-            }
-            else{
-                console.log("Редачу");
+            else
                 await editRecipe(id, name, description, ingredients, steps);
-            }
             reset();
         });
   

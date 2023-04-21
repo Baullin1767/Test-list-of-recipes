@@ -1,51 +1,54 @@
 import uuid
 from fastapi import Body
 import psycopg2 as p2
+import json
 
 def connect_db():
     global connect, cursor
-    connect = p2.connect(dbname = "PostgreSQL 15", host="localhost", user="postgres", password="1767")
+    connect = p2.connect(dbname = "postgres", host="localhost", user="postgres", password="1767")
     cursor = connect.cursor()
+    cursor.execute(
+"CREATE TABLE IF NOT EXISTS recipes (id INTEGER PRIMARY KEY, name TEXT, description TEXT, ingredients TEXT, steps TEXT)")
+    cursor.execute(
+"CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, login TEXT, pass TEXT)")
+    connect.commit()
     print('Подключился к базе')
 
 
 #INSERT
 
 def db_create_recipe(data = Body()):
-    with cursor as cur:
-        cur.execute(
-            "INSERT INTO recipes (id, name, description, ingredients, steps) VALUES(%s, %s, %s, %s, %s)",
-            (str(uuid.uuid4()), data["name"],data["description"],data["ingredients"],data["steps"]))
+    cursor.execute(
+        "INSERT INTO recipes (id, name, description, ingredients, steps) VALUES(%s, %s, %s, %s, %s)",
+        (str(uuid.uuid4()), data["name"],data["description"],data["ingredients"],json.dumps(data["steps"])))
 
 
 #SELECT
 
 def db_get_recipes():
-    with cursor as cur:
-        recipes = cur.execute("SELECT * FROM recipes").fetchall()
+    recipes = cursor.execute("SELECT * FROM recipes")
+    recipe = cursor.fetchall()
     return recipes
 
-def db_get_recipes(recipe_id):
-    with cursor as cur:
-        recipe = cur.execute("SELECT * FROM recipes WHERE id=%s", (recipe_id,)).fetchone()
+def db_get_recipes_id(recipe_id):
+    cursor.execute("SELECT * FROM recipes WHERE id=%s", (recipe_id,))
+    recipe = cursor.fetchall()
     return recipe
 
 
 #UPDATE
 
 def db_edit_recipe(data = Body()):
-    with cursor as cur:
-        cur.execute(
+    cursor.execute(
             "UPDATE recipes SET name=%s WHERE id=%s", (data["name"], data["id"]))
-        cur.execute(
-            "UPDATE recipes SET description=%s WHERE id=%s", (data["description"], data["id"]))
-        cur.execute(
-            "UPDATE recipes SET ingredients=%s WHERE id=%s", (data["ingredients"], data["id"]))
-        cur.execute(
-            "UPDATE recipes SET steps=%s WHERE id=%s",(data["steps"], data["id"]))
+    cursor.execute(
+        "UPDATE recipes SET description=%s WHERE id=%s", (data["description"], data["id"]))
+    cursor.execute(
+        "UPDATE recipes SET ingredients=%s WHERE id=%s", (data["ingredients"], data["id"]))
+    cursor.execute(
+        "UPDATE recipes SET steps=%s WHERE id=%s",(json.dumps(data["steps"]), data["id"]))
 
 #DЕLETE
 
 def db_delete_recipe(id):
-    with cursor as cur:
-        cur.execute("DELETE FROM recipes WHERE id=%s", (id,))
+    cursor.execute("DELETE FROM recipes WHERE id=%s", (id,))
