@@ -5,7 +5,7 @@ from fastapi import FastAPI, Body, status
 from fastapi.responses import JSONResponse, FileResponse
 
 from db import *
- 
+
 class Recipe:
     def __init__(self, name, description="Описание", ingredients="ингридиенты", steps={"шаг": 5}):
         self.name = name
@@ -32,6 +32,7 @@ connect_db()
 #         db_create_recipe(recipe)
 # create_recipe()
 
+# Считаем время готовки
 def get_time_cooking(recipe):
     steps_text = json.loads(recipe[4])
     time = 0
@@ -49,6 +50,7 @@ app = FastAPI()
 async def main():
     return FileResponse("public/index.html")
  
+# Получаем рецепт по id
 @app.get("/api/{user_id}/recipes")
 def get_recipes(user_id):
     if db_get_user_ex(user_id):
@@ -71,7 +73,7 @@ def get_recipe(user_id, id):
                     status_code=status.HTTP_404_NOT_FOUND, 
                     content={ "message": "Рецепт не найден" }
             )
-        #если пользователь найден, отправляем его
+        #если рецепт найден, отправляем его
         return recipe
     else:
             return JSONResponse(
@@ -79,7 +81,7 @@ def get_recipe(user_id, id):
                     content={ "message": "Вы не авторизованы" }
             )
 
-
+# Фильтры
 @app.get("/api/{user_id}/recipes/filters/{filter}")
 def get_recipes_filtered(user_id, filter):
     if db_get_user_ex(user_id):
@@ -121,7 +123,7 @@ def get_recipes_min_max(filter):
         sorted(dict_recipes, key=dict_recipes.get, reverse=True)
         return dict_recipes # Возвращаем отсортированый словарь
 
-
+# Создаём пользователя
 @app.post("/api/user/")
 def create_user(data  = Body()):
     user = User(data["login"],
@@ -132,7 +134,7 @@ def create_user(data  = Body()):
     return user
 
 
- 
+# Создаём рецепт
 @app.post("/api/{user_id}/recipes")
 def create_recipe(user_id, data  = Body()):
     if db_get_user_ex(user_id):
@@ -176,7 +178,7 @@ def edit_recipe(user_id, data  = Body()):
 @app.delete("/api/{user_id}/recipes/{id}")
 def delete_recipe(user_id, id):
     if db_get_user_ex(user_id):
-        # получаем пользователя по id
+        # получаем рецепт по id
         recipe = db_get_recipes_id(id)
     
         # если не найден, отправляем статусный код и сообщение об ошибке
@@ -186,7 +188,7 @@ def delete_recipe(user_id, id):
                     content={ "message": "Рецепт не найден" }
             )
     
-        # если пользователь найден, удаляем его
+        # если рецепт найден, удаляем его
         db_delete_recipe(id)
         return recipe
     else:
