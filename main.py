@@ -20,17 +20,17 @@ class User:
         self.id = str(uuid.uuid4())
 
 connect_db()
+# Метод заполняет пустую базу
+# def create_recipe():
+#     for _ in range(100):
+#         recipe = Recipe("name",
+#                         "description",
+#                         "ingredients",
+#                         {"шаг": 5})
 
-def create_recipe():
-    for _ in range(100):
-        recipe = Recipe("name",
-                        "description",
-                        "ingredients",
-                        {"шаг": 5})
-
-        # добавляем объект в таблицу recipes
-        db_create_recipe(recipe)
-create_recipe()
+#         # добавляем объект в таблицу recipes
+#         db_create_recipe(recipe)
+# create_recipe()
 
 def get_time_cooking(recipe):
     steps_text = json.loads(recipe[4])

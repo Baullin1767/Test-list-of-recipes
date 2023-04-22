@@ -4,7 +4,7 @@ import json
 
 def connect_db():
     global connect, cursor
-    connect = p2.connect(dbname = "postgres", user="postgres", password="123456", host="127.0.0.1")
+    connect = p2.connect(dbname = "postgres", user="postgres", password="postgres", host="127.0.0.1")
     cursor = connect.cursor()
     # cursor.execute("CREATE DATABASE recipes_db")
     cursor.execute(
