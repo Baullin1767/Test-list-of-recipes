@@ -17,17 +17,6 @@ class Recipe:
 
 connect_db()
 
-def create_recipe():
-    print('тут')
-    for _ in range(100):
-        recipe = Recipe("name",
-                        "description",
-                        "ingredients",
-                        {"шаг": 5})
-
-        # добавляем объект в таблицу recipes
-        db_create_recipe(recipe)
-create_recipe()
 
 def get_time_cooking(recipe):
     steps_text = json.loads(recipe[4])
