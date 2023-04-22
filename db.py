@@ -1,26 +1,26 @@
-import uuid
 from fastapi import Body
 import psycopg2 as p2
 import json
 
 def connect_db():
     global connect, cursor
-    connect = p2.connect(dbname = "postgres", host="localhost", user="postgres", password="1767")
+    connect = p2.connect(dbname = "postgres", user="postgres", password="123456", host="127.0.0.1")
     cursor = connect.cursor()
+    # cursor.execute("CREATE DATABASE recipes_db")
     cursor.execute(
-"CREATE TABLE IF NOT EXISTS recipes (id INTEGER PRIMARY KEY, name TEXT, description TEXT, ingredients TEXT, steps TEXT)")
+"CREATE TABLE IF NOT EXISTS recipes (id TEXT PRIMARY KEY, name TEXT, description TEXT, ingredients TEXT, steps TEXT)")
     cursor.execute(
-"CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, login TEXT, pass TEXT)")
+"CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, login TEXT, pass TEXT)")
     connect.commit()
     print('Подключился к базе')
 
 
 #INSERT
 
-def db_create_recipe(data = Body()):
+def db_create_recipe(recipe):
     cursor.execute(
         "INSERT INTO recipes (id, name, description, ingredients, steps) VALUES(%s, %s, %s, %s, %s)",
-        (str(uuid.uuid4()), data["name"],data["description"],data["ingredients"],json.dumps(data["steps"])))
+        (recipe.id, recipe.name, recipe.description, recipe.ingredients, json.dumps(recipe.steps)))
 
 
 #SELECT
